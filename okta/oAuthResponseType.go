@@ -18,13 +18,10 @@
 
 package okta
 
-import ()
-
-type OAuthResponseType struct {
-}
+type OAuthResponseType string
 
 func NewOAuthResponseType() *OAuthResponseType {
-	return &OAuthResponseType{}
+	return new(OAuthResponseType)
 }
 
 func (a *OAuthResponseType) IsApplicationInstance() bool {

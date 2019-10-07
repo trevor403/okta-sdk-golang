@@ -18,13 +18,10 @@
 
 package okta
 
-import ()
-
-type OAuthGrantType struct {
-}
+type OAuthGrantType string
 
 func NewOAuthGrantType() *OAuthGrantType {
-	return &OAuthGrantType{}
+	return new(OAuthGrantType)
 }
 
 func (a *OAuthGrantType) IsApplicationInstance() bool {
