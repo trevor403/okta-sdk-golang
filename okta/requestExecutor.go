@@ -161,7 +161,7 @@ func (re *RequestExecutor) doWithRetries(req *http.Request, retryCount int32, re
 		}
 
 		if resp.Header == nil {
-			return resp, errors.New("req object was corrupted")
+			return resp, errors.New("resp object was corrupted")
 		}
 
 		req.Header.Add("X-Okta-Retry-For", resp.Header.Get("X-Okta-Request-Id"))
