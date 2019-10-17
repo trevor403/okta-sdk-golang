@@ -140,7 +140,7 @@ func (re *RequestExecutor) doWithRetries(req *http.Request, retryCount int32, re
 			if err != nil {
 				return nil, err
 			}
-			
+
 			retryLimitReset := resp.Header.Get("X-Rate-Limit-Reset")
 			date := resp.Header.Get("Date")
 			if retryLimitReset == "" || date == "" {
@@ -155,6 +155,10 @@ func (re *RequestExecutor) doWithRetries(req *http.Request, retryCount int32, re
 			}
 		}
 		retryCount++
+
+		if req.Header == nil {
+			return resp, errors.New("req object was corrupted")
+		}
 
 		req.Header.Add("X-Okta-Retry-For", resp.Header.Get("X-Okta-Request-Id"))
 		req.Header.Add("X-Okta-Retry-Count", fmt.Sprint(retryCount))

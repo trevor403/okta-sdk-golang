@@ -20,6 +20,7 @@ package okta
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -60,6 +61,10 @@ func (a *Application) IsApplicationInstance() bool {
 }
 
 func (m *ApplicationResource) GetApplication(appId string, appInstance App, qp *query.Params) (interface{}, *Response, error) {
+	if appId == "" {
+		return nil, nil, errors.New("appId can not be empty")
+	}
+
 	url := fmt.Sprintf("/api/v1/apps/%v", appId)
 	if qp != nil {
 		url = url + qp.String()
