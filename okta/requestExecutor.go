@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -120,7 +119,6 @@ func (re *RequestExecutor) Do(req *http.Request, v interface{}) (*Response, erro
 
 func (re *RequestExecutor) doWithRetries(req *http.Request, retryCount int32, requestStarted int64, lastResponse *http.Response) (*http.Response, error) {
 	iterationStart := time.Now().Unix()
-	maxRetries := re.config.Okta.Client.RateLimit.MaxRetries
 	requestTimeout := int64(re.config.Okta.Client.RequestTimeout)
 
 	if req.Body != nil {
@@ -133,42 +131,6 @@ func (re *RequestExecutor) doWithRetries(req *http.Request, retryCount int32, re
 	}
 
 	resp, err := re.httpClient.Do(req)
-
-	if (err != nil || tooManyRequests(resp)) && retryCount < maxRetries {
-		if resp != nil {
-			err := tryDrainBody(resp.Body)
-			if err != nil {
-				return nil, err
-			}
-
-			retryLimitReset := resp.Header.Get("X-Rate-Limit-Reset")
-			date := resp.Header.Get("Date")
-			if retryLimitReset == "" || date == "" {
-				return resp, errors.New("a 429 response must include the x-retry-limit-reset and date headers")
-			}
-		}
-
-		if tooManyRequests(resp) {
-			err := backoffPause(retryCount, resp)
-			if err != nil {
-				return nil, err
-			}
-		}
-		retryCount++
-
-		if req.Header == nil {
-			return resp, errors.New("req object was corrupted")
-		}
-
-		if resp.Header == nil {
-			return resp, errors.New("resp object was corrupted")
-		}
-
-		req.Header.Add("X-Okta-Retry-For", resp.Header.Get("X-Okta-Request-Id"))
-		req.Header.Add("X-Okta-Retry-Count", fmt.Sprint(retryCount))
-
-		resp, err = re.doWithRetries(req, retryCount, requestStarted, resp)
-	}
 
 	return resp, err
 }
